@@ -70,6 +70,7 @@ class Login extends React.Component {
 
     return (
       <section>
+
         {loading && <Loading />}
 
         <div data-testid="page-login">
