@@ -1,16 +1,31 @@
 import React from 'react';
 import Header from '../components/Header';
+import searchAlbumsAPI from '../services/searchAlbumsAPI';
+import Loading from '../components/Loading';
+import SearchForm from './SearchForm';
+import SearchResult from './SearchResult';
 
 class Search extends React.Component {
   constructor() {
     super();
     this.onInputChange = this.onInputChange.bind(this);
     this.handleSearchButtonDisable = this.handleSearchButtonDisable.bind(this);
+    this.loadingStarted = this.loadingStarted.bind(this);
+    this.loadingEnded = this.loadingEnded.bind(this);
+    this.searchAlbum = this.searchAlbum.bind(this);
 
     this.state = {
       searchInput: '',
       isSearchButtonDisabled: true,
+      loading: true,
+      thereIsASearchResult: false,
+      resultArray: [],
+      lastArtistSearched: '',
     };
+  }
+
+  componentDidMount() {
+    this.loadingEnded();
   }
 
   handleSearchButtonDisable() {
@@ -35,30 +50,58 @@ class Search extends React.Component {
     });
   }
 
+  async searchAlbum() {
+    const { searchInput } = this.state;
+    this.loadingStarted();
+    const APIResult = await searchAlbumsAPI(searchInput);
+
+    this.setState({
+      resultArray: APIResult,
+      thereIsASearchResult: true,
+      lastArtistSearched: searchInput,
+      searchInput: '',
+    });
+
+    this.loadingEnded();
+  }
+
+  loadingStarted() {
+    this.setState({ loading: true });
+  }
+
+  loadingEnded() {
+    this.setState({ loading: false });
+  }
+
   render() {
-    const { searchInput, isSearchButtonDisabled } = this.state;
+    const { searchInput, isSearchButtonDisabled, loading,
+      thereIsASearchResult, resultArray, lastArtistSearched } = this.state;
 
     return (
       <div data-testid="page-search">
         <Header />
-        <form>
-          <input
-            type="text"
-            data-testid="search-artist-input"
-            placeholder="Nome do Artista"
-            name="searchInput"
-            value={ searchInput }
-            onChange={ this.onInputChange }
-          />
+        {loading ? <Loading />
+          : (
+            <SearchForm
+              searchInput={ searchInput }
+              isSearchButtonDisabled={ isSearchButtonDisabled }
+              onInputChange={ this.onInputChange }
+              searchAlbum={ this.searchAlbum }
+            />)}
+        {(resultArray.length === 0 && thereIsASearchResult) && (
+          <p>
+            Nenhum álbum foi encontrado
+          </p>)}
 
-          <button
-            type="button"
-            data-testid="search-artist-button"
-            disabled={ isSearchButtonDisabled }
-          >
-            Pesquisar
-          </button>
-        </form>
+        {resultArray.length > 0 && thereIsASearchResult && (
+          <div>
+            <p>{`Resultado de álbuns de: ${lastArtistSearched}`}</p>
+            <SearchResult
+              resultArray={ resultArray }
+              searchInput={ searchInput }
+            />
+          </div>
+        )}
       </div>
     );
   }
