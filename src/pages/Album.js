@@ -20,12 +20,9 @@ class Album extends React.Component {
     };
   }
 
-  componentDidMount() {
+  async componentDidMount() {
     this.getTrackList();
     this.loadingEnded();
-  }
-
-  componentDidUpdate() {
   }
 
   async getTrackList() {
@@ -50,9 +47,7 @@ class Album extends React.Component {
   }
 
   loadingStarted() {
-    this.setState({ loading: true }, () => {
-      this.setState({ loading: true });
-    });
+    this.setState({ loading: true });
   }
 
   loadingEnded() {
@@ -80,9 +75,12 @@ class Album extends React.Component {
               trackName={ trackName }
               previewUrl={ previewUrl }
               key={ trackId }
-              trackId={ trackId }
+              cardTrackId={ trackId }
               saveFavoriteTrack={ this.saveFavoriteTrack }
               loading={ loading }
+              handleCheck={ this.handleCheck }
+              loadingStarted={ this.loadingStarted }
+              loadingEnded={ this.loadingEnded }
               // trackNumber={ index }
             />);
           }
