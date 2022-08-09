@@ -3,7 +3,6 @@ import Header from '../components/Header';
 import Loading from '../components/Loading';
 import MusicCard from '../components/MusicCard';
 import getMusics from '../services/musicsAPI';
-import { addSong } from '../services/favoriteSongsAPI';
 
 class Album extends React.Component {
   constructor() {
@@ -11,7 +10,7 @@ class Album extends React.Component {
     this.getTrackList = this.getTrackList.bind(this);
     this.loadingStarted = this.loadingStarted.bind(this);
     this.loadingEnded = this.loadingEnded.bind(this);
-    this.saveFavoriteTrack = this.saveFavoriteTrack.bind(this);
+    // this.saveFavoriteTrack = this.saveFavoriteTrack.bind(this);
 
     this.state = {
       albumTracks: [],
@@ -33,17 +32,6 @@ class Album extends React.Component {
     const APIObj = await getMusics(albumId);
     this.setState({ albumTracks: APIObj, albumInfo: APIObj[0] });
     this.loadingEnded();
-  }
-
-  async saveFavoriteTrack(event) {
-    const { target } = event;
-    const { id } = target;
-    this.loadingStarted();
-    if (target.checked) {
-      const obj = await getMusics(id);
-      await addSong(obj);
-      this.loadingEnded();
-    }
   }
 
   loadingStarted() {
@@ -70,18 +58,19 @@ class Album extends React.Component {
         </h4>
         {albumTracks.map((track, index) => {
           if (index > 0) {
-            const { trackName, previewUrl, trackId } = track;
+            const { trackName, previewUrl, trackId, trackViewUrl } = track;
             return (<MusicCard
               trackName={ trackName }
               previewUrl={ previewUrl }
               key={ trackId }
-              cardTrackId={ trackId }
+              trackId={ trackId }
               saveFavoriteTrack={ this.saveFavoriteTrack }
               loading={ loading }
               handleCheck={ this.handleCheck }
               loadingStarted={ this.loadingStarted }
               loadingEnded={ this.loadingEnded }
-              // trackNumber={ index }
+              trackViewUrlCard={ trackViewUrl }
+              trackNumber={ index }
             />);
           }
           return null;
